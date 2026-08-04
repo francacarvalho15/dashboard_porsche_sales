@@ -1,0 +1,1107 @@
+<!doctype html>
+<html lang="en" data-visualize-standalone>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>Porsche Sales Evolution</title>
+<style>:root {
+  color-scheme: light dark;
+  background-color: transparent !important;
+
+  /* Agent-facing contract; keep in sync with SKILL.md. */
+  --background: var(
+    --main-surface-primary,
+    light-dark(rgb(255 255 255), rgb(24 24 24))
+  );
+  --foreground: light-dark(rgb(26 28 31), rgb(255 255 255));
+  --card: color-mix(in oklab, var(--foreground) 5%, transparent);
+  --card-foreground: var(--foreground);
+  --popover: light-dark(rgb(255 255 255), rgb(45 45 45));
+  --popover-foreground: var(--foreground);
+  --primary: light-dark(rgb(51 156 255), rgb(131 195 255));
+  --primary-foreground: light-dark(rgb(255 255 255), rgb(13 13 13));
+  --secondary: light-dark(rgb(255 255 255 / 96%), rgb(54 54 54 / 96%));
+  --secondary-foreground: var(--foreground);
+  --muted: color-mix(in srgb, var(--foreground) 10%, transparent);
+  --muted-foreground: light-dark(
+    rgb(26 28 31 / 49.4%),
+    rgb(255 255 255 / 49.8%)
+  );
+  --accent: light-dark(rgb(229 242 255), rgb(13 39 63));
+  --accent-foreground: var(--primary);
+  --destructive: light-dark(rgb(226 85 7), rgb(255 133 73));
+  --border: light-dark(rgb(26 28 31 / 8%), rgb(255 255 255 / 8.2%));
+  --input: light-dark(
+    rgb(26 28 31 / 11.8%),
+    color-mix(in oklab, rgb(0 0 0) 10%, transparent)
+  );
+  --ring: light-dark(rgb(51 156 255), rgb(131 195 255 / 76%));
+  --font-size-base: 14px;
+  --red: light-dark(rgb(186 38 35), rgb(250 66 62));
+  --green: light-dark(rgb(0 162 64), rgb(64 201 119));
+
+  /* Internal implementation variables; not part of the agent contract. */
+  --font-sans: -apple-system, system-ui, "Segoe UI", sans-serif;
+  --font-mono:
+    ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono",
+    monospace;
+  --font-size-normal: max(11px, var(--font-size-base));
+  --font-size-tooltip: calc(var(--font-size-base) - 1px);
+  --font-size-small: max(11px, calc(var(--font-size-base) - 2px));
+  --font-size-h1: calc(var(--font-size-normal) * 1.7142857143);
+  --font-size-h2: calc(var(--font-size-normal) * 1.4285714286);
+  --font-size-h3: calc(var(--font-size-normal) * 1.2857142857);
+  --font-weight-normal: 430;
+  --font-weight-medium: 500;
+  --line-height-normal: calc(var(--font-size-normal) * 1.5);
+  --line-height-tooltip: calc(var(--font-size-tooltip) * 1.4285714286);
+  --line-height-small: calc(var(--font-size-small) + 4px);
+  --radius: 10px;
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-2xl: calc(var(--radius) * 1.6);
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px -1px rgb(0 0 0 / 8%);
+  --checkmark-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 17 17'%3E%3Cpath d='M12.8961 3.64101C13.1297 3.41418 13.4984 3.37523 13.7779 3.56581C14.0571 3.75635 14.1554 4.11331 14.0299 4.41347L13.9615 4.53847L7.71151 13.7045C7.59411 13.8767 7.4063 13.9877 7.19881 14.0072C6.99136 14.0267 6.78564 13.9533 6.63826 13.806L2.88826 10.056L2.79842 9.9457C2.6192 9.67407 2.64927 9.30496 2.88826 9.06581C3.12738 8.82669 3.49647 8.79676 3.76815 8.97597L3.8785 9.06581L7.03084 12.2182L12.8053 3.74941L12.8961 3.64101Z'/%3E%3C/svg%3E");
+
+  /* Legacy aliases; not part of the current agent contract. */
+  --viz-bg: transparent;
+  --viz-panel: var(--card);
+  --viz-border: var(--border);
+  --viz-text: var(--foreground);
+  --viz-muted: var(--muted-foreground);
+  --viz-accent: var(--primary);
+  --viz-accent-text: var(--primary-foreground);
+  --viz-accent-bg: var(--accent);
+  --viz-font-size: var(--font-size-base);
+  --viz-warning: var(--destructive);
+  --color-background-primary: var(--background);
+  --color-text-primary: var(--foreground);
+  --color-border-secondary: var(--border);
+}
+
+:root[data-visualize-standalone] {
+  background-color: var(--background) !important;
+}
+
+/* Generic mobile code-block hosts provide light/dark mode but no series palette.
+   AppBlock hosts set all six variables themselves. */
+:root:not([data-app-block-surface]) {
+  --viz-series-1: var(--primary);
+  --viz-series-2: light-dark(#f3883b, #f59a56);
+  --viz-series-3: light-dark(#5dc977, #74d58b);
+  --viz-series-4: light-dark(#eb77b1, #f08fc0);
+  --viz-series-5: light-dark(#9b79ec, #aa91ef);
+  --viz-series-6: light-dark(#3ab9b1, #5acbc2);
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html > body {
+  margin: 0;
+  padding: 5px;
+  color: var(--foreground);
+  background: transparent !important;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-normal);
+  font-weight: var(--font-weight-normal);
+  line-height: var(--line-height-normal);
+}
+
+:root:not([data-app-block-surface]) > body {
+  padding: 12px;
+}
+
+a {
+  color: color-mix(in srgb, var(--viz-accent) 80%, var(--viz-text) 20%);
+  cursor: pointer;
+  font-weight: var(--font-weight-medium);
+  text-decoration: none;
+  text-underline-offset: 2px;
+}
+
+a:is(:hover, :focus-visible) {
+  text-decoration-line: underline;
+  text-decoration-style: dashed;
+  text-decoration-thickness: 0.5px;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+  margin-block: 0;
+}
+
+h1 {
+  font-size: var(--font-size-h1);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.25;
+}
+
+h2 {
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.25;
+}
+
+h3,
+h4,
+h5,
+h6 {
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.3;
+}
+
+b,
+strong,
+th {
+  font-weight: var(--font-weight-medium);
+}
+
+code:not(pre code) {
+  display: inline;
+  padding: 1px 6px;
+  border-radius: var(--radius-sm);
+  background: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+  overflow-wrap: anywhere;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  word-break: break-word;
+}
+
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  color: var(--foreground);
+  font: inherit;
+  text-align: start;
+}
+
+.table :is(th, td) {
+  padding-block: 10px;
+  padding-inline: 0 24px;
+  overflow-wrap: anywhere;
+  border-bottom: 1px solid var(--border);
+  text-align: start;
+  vertical-align: top;
+}
+
+.table-responsive > .table :is(th, td) {
+  overflow-wrap: break-word;
+}
+
+.table :is(th, td):last-child {
+  padding-inline-end: 0;
+}
+
+.table :is(caption, thead th) {
+  font-weight: 600;
+}
+
+.table thead th {
+  padding-block: 8px;
+  border-bottom-color: color-mix(in srgb, var(--foreground) 16%, transparent);
+}
+
+.table tbody tr:last-child :is(th, td) {
+  border-bottom: 0;
+}
+
+.table.table-sm :is(th, td) {
+  padding-block: 6px;
+}
+
+.table.table-sm :is(th, td):not(:last-child) {
+  padding-inline-end: 16px;
+}
+
+.table :is(.text-end, [align="right"]) {
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+
+.table :is(.text-center, [align="center"]) {
+  text-align: center;
+}
+
+.table .text-nowrap {
+  white-space: nowrap;
+}
+
+#widget {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  padding: 0;
+  background: transparent !important;
+}
+
+.card {
+  min-width: 0;
+  padding: 12px;
+  overflow: hidden;
+  overflow-wrap: break-word;
+  border-radius: var(--radius-2xl);
+  color: var(--card-foreground);
+  background: var(--card);
+}
+
+#widget > :not(.card) {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.tooltip {
+  position: fixed;
+  z-index: 50;
+  top: 0;
+  left: 0;
+  width: max-content;
+  max-width: min(
+    20rem,
+    var(--tooltip-available-width, calc(100vw - 10px)),
+    calc(100vw - 10px)
+  );
+  max-height: min(
+    var(--tooltip-available-height, calc(100vh - 10px)),
+    calc(100vh - 10px)
+  );
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  color: var(--popover-foreground);
+  background: var(--popover);
+  box-shadow: none;
+  font-size: var(--font-size-tooltip);
+  line-height: var(--line-height-tooltip);
+  overflow-wrap: break-word;
+  white-space: normal;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* The bundled tooltip runtime owns [data-tooltip]. AppBlock's CSS-only
+   pseudo-tooltip can widen dense grids even while hidden. */
+main [data-tooltip]::after {
+  content: none;
+}
+
+.viz-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(max(180px, 24%), 1fr));
+  gap: 10px;
+}
+
+.viz-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.viz-stat-value {
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.25;
+}
+
+.viz-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.viz-badge {
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+  color: var(--accent-foreground);
+  background: var(--accent);
+  font-weight: var(--font-weight-medium);
+}
+
+small,
+.text-small,
+.viz-badge {
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-small);
+}
+
+.text-muted {
+  color: var(--muted-foreground);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.viz-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.viz-controls > .form-label {
+  display: grid;
+  min-width: min(100%, 260px);
+  flex: 1 1 280px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 2px 12px;
+  margin-bottom: 0;
+}
+
+.viz-controls > .form-label > :is(.form-control, .form-range, .form-select) {
+  grid-column: 1 / -1;
+}
+
+.btn,
+.form-check-input,
+.form-control,
+.form-range,
+.form-select {
+  font: inherit;
+}
+
+.btn {
+  appearance: button;
+  display: inline-flex;
+  inline-size: fit-content;
+  max-inline-size: 100%;
+  min-height: 28px;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  margin: 0;
+  padding: 0 8px;
+  -webkit-app-region: no-drag;
+  border: 1px solid var(--input);
+  border-radius: var(--radius-lg);
+  color: var(--secondary-foreground);
+  background: var(--secondary);
+  cursor: var(--cursor-interaction, pointer);
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+  user-select: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+.btn:is(.btn-block, .viz-tile) {
+  inline-size: 100%;
+}
+
+.btn.viz-tile {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+a.btn {
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.btn:not(:disabled):hover {
+  background: color-mix(in srgb, var(--foreground) 6%, var(--secondary));
+}
+
+.btn-primary {
+  border-color: transparent;
+  color: var(--interactive-label-primary-default, var(--primary-foreground));
+  background: var(--interactive-bg-primary-default, var(--foreground));
+  background-clip: padding-box;
+}
+
+.btn-primary .text-muted {
+  color: color-mix(
+    in srgb,
+    var(--interactive-label-primary-default, var(--primary-foreground)) 50%,
+    transparent
+  );
+}
+
+.btn-primary:not(:disabled):hover {
+  background: color-mix(in srgb, var(--foreground) 80%, transparent);
+  background-clip: padding-box;
+}
+
+.btn-ghost {
+  border-color: transparent;
+  color: var(--muted-foreground);
+  background: transparent;
+}
+
+.btn-ghost:not(:disabled):hover {
+  color: var(--foreground);
+  background: color-mix(in srgb, var(--foreground) 6%, var(--secondary));
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+[data-lucide] {
+  stroke-width: 1.6;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--foreground);
+}
+
+.form-control {
+  display: block;
+  width: 100%;
+  min-height: 28px;
+  padding: 0 8px;
+  outline: none;
+  border: 1px solid var(--input);
+  border-radius: var(--radius-lg);
+  color: var(--foreground);
+  background: var(--secondary);
+}
+
+.form-control::placeholder {
+  color: var(--muted-foreground);
+}
+
+.form-control[type="file"] {
+  padding: 0;
+  overflow: hidden;
+  cursor: var(--cursor-interaction, pointer);
+}
+
+.form-control[type="file"]::file-selector-button {
+  min-height: 26px;
+  margin-right: 8px;
+  padding: 0 8px;
+  border: 0;
+  border-right: 1px solid var(--input);
+  color: var(--secondary-foreground);
+  background: var(--secondary);
+  cursor: inherit;
+  font: inherit;
+}
+
+.form-control[type="file"]:not(:disabled):hover::file-selector-button {
+  background: color-mix(in srgb, var(--foreground) 6%, var(--secondary));
+}
+
+.form-control-color[type="color"] {
+  width: 40px;
+  height: 28px;
+  padding: 3px;
+  cursor: var(--cursor-interaction, pointer);
+}
+
+.form-control-color[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.form-control-color[type="color"]::-webkit-color-swatch {
+  border: 0;
+  border-radius: calc(var(--radius-lg) - 4px);
+}
+
+textarea.form-control {
+  height: auto;
+  min-height: 72px;
+  padding: 8px 10px;
+  resize: vertical;
+}
+
+.form-control:focus-visible {
+  border-color: var(--ring);
+  box-shadow: inset 0 0 0 1px var(--ring);
+}
+
+.form-control:disabled,
+.form-select:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.form-select {
+  appearance: none;
+  display: block;
+  width: 100%;
+  min-height: 28px;
+  margin: 0;
+  padding: 0 32px 0 8px;
+  outline: none;
+  border: 1px solid var(--input);
+  border-radius: var(--radius-lg);
+  color: var(--foreground);
+  background-color: var(--secondary);
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--muted-foreground) 50%),
+    linear-gradient(135deg, var(--muted-foreground) 50%, transparent 50%);
+  background-position:
+    calc(100% - 14px) 50%,
+    calc(100% - 10px) 50%;
+  background-repeat: no-repeat;
+  background-size: 4px 4px;
+  cursor: var(--cursor-interaction, default);
+}
+
+.form-select:not(:disabled):hover {
+  background-color: color-mix(in srgb, var(--foreground) 6%, var(--secondary));
+}
+
+.form-select:focus-visible {
+  border-color: var(--ring);
+  box-shadow: inset 0 0 0 1px var(--ring);
+}
+
+.form-check {
+  display: flex;
+  min-height: 20px;
+  align-items: center;
+  gap: 6px;
+}
+
+.form-check-input {
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  flex: 0 0 auto;
+  margin: 0;
+  border: 1px solid var(--input);
+  color: var(--primary-foreground);
+  background-color: transparent;
+  cursor: var(--cursor-interaction, default);
+  transition:
+    background-color 150ms,
+    border-color 150ms,
+    box-shadow 150ms;
+}
+
+.form-check:not(.form-switch) .form-check-input[type="checkbox"] {
+  border-color: var(--input);
+  border-radius: var(--radius-sm);
+  background-color: var(--secondary);
+  box-shadow: var(--shadow-sm);
+}
+
+.form-check:not(.form-switch)
+  .form-check-input:not(:disabled):not(:checked):hover {
+  background-color: var(--card);
+}
+
+.form-check:not(.form-switch) .form-check-input[type="checkbox"]:checked {
+  border-color: var(--primary);
+  background-color: var(--primary);
+}
+
+.form-check:not(.form-switch)
+  .form-check-input[type="checkbox"]:checked::before {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--primary-foreground);
+  content: "";
+  mask: var(--checkmark-image) center / 12px 12px no-repeat;
+}
+
+.form-check-input[type="radio"] {
+  width: 14px;
+  height: 14px;
+  border-radius: var(--radius-full);
+}
+
+.form-check-input[type="radio"]:checked {
+  border: 2px solid var(--primary);
+  background:
+    radial-gradient(circle, var(--primary-foreground) 0 2.5px, transparent 3px),
+    var(--primary);
+}
+
+.form-check:not(.form-switch) .form-check-input:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.form-check:not(.form-switch) .form-check-input:disabled {
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.form-check:not(.form-switch) .form-check-input:disabled + .form-check-label {
+  cursor: not-allowed;
+}
+
+.form-switch .form-check-input:disabled,
+.form-switch .form-check-input:disabled + .form-check-label {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.form-check-label {
+  color: var(--foreground);
+  cursor: var(--cursor-interaction, default);
+}
+
+.form-switch .form-check-input {
+  position: relative;
+  width: 32px;
+  height: 20px;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: var(--muted);
+  box-shadow: none;
+  transition: background-color 200ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.form-switch .form-check-input::before {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 16px;
+  height: 16px;
+  box-sizing: border-box;
+  border: 1px solid light-dark(var(--primary-foreground), var(--foreground));
+  border-radius: var(--radius-full);
+  background: light-dark(var(--primary-foreground), var(--foreground));
+  box-shadow: var(--shadow-sm);
+  content: "";
+  transform: translate(2px, -50%);
+  transition: transform 200ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.form-switch .form-check-input:checked {
+  background: var(--primary);
+}
+
+.form-switch .form-check-input:checked::before {
+  transform: translate(14px, -50%);
+}
+
+.form-switch .form-check-input:focus-visible {
+  box-shadow: 0 0 0 2px var(--ring);
+}
+
+.form-range {
+  appearance: none;
+  display: block;
+  width: 100%;
+  height: 28px;
+  flex: 1;
+  margin: 0;
+  padding: 0;
+  outline: none;
+  border: 0;
+  accent-color: var(--primary);
+  background: linear-gradient(
+      color-mix(in srgb, var(--foreground) 7%, transparent),
+      color-mix(in srgb, var(--foreground) 7%, transparent)
+    )
+    center / 100% 2px no-repeat;
+}
+
+.form-range::-webkit-slider-runnable-track {
+  height: 28px;
+  background: transparent;
+}
+
+.form-range::-webkit-slider-thumb {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  margin-top: 4px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  background: light-dark(var(--primary-foreground), var(--foreground));
+}
+
+.form-range:focus-visible::-webkit-slider-thumb {
+  border-color: var(--ring);
+  box-shadow: inset 0 0 0 1px var(--ring);
+}
+
+.form-range::-moz-range-track {
+  height: 28px;
+  background: transparent;
+}
+
+.form-range::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  background: light-dark(var(--primary-foreground), var(--foreground));
+}
+
+.form-range:focus-visible::-moz-range-thumb {
+  border-color: var(--ring);
+  box-shadow: inset 0 0 0 1px var(--ring);
+}
+
+.form-range:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.btn:not(.btn-primary, .viz-tile):is(
+    [aria-pressed="true"],
+    [aria-selected="true"],
+    .is-selected
+  ) {
+  border-color: var(--primary);
+  color: var(--primary-foreground);
+  background: var(--primary);
+}
+
+.btn.viz-tile:is([aria-pressed="true"], [aria-selected="true"], .is-selected) {
+  border-color: var(--primary);
+  box-shadow: inset 0 0 0 1px var(--primary);
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+#widget > svg {
+  width: 100%;
+}
+
+.text-warning,
+.text-destructive {
+  color: var(--destructive);
+}
+</style>
+</head>
+<body>
+<div id="porsche-sales-evolution">
+<style>
+#porsche-sales-evolution{--ink:#0e0e12;--paper:#f5f4f2;--muted:#6b6a70;--line:#d8d6d2;--red:#d5001c;--dark:#18181c;font-family:Arial,Helvetica,sans-serif;color:var(--ink);background:var(--paper);min-height:100%;padding:22px;box-sizing:border-box}
+#porsche-sales-evolution *{box-sizing:border-box} .pd-shell{max-width:1440px;margin:auto}.pd-top{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:1px solid var(--line);padding:8px 0 22px;gap:20px}.pd-brand{font-weight:800;letter-spacing:.32em;font-size:18px}.pd-eyebrow{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--red);font-weight:700;margin-bottom:8px}.pd-top h1{font-size:clamp(28px,4vw,54px);letter-spacing:-.045em;line-height:.95;margin:0;font-weight:600}.pd-period{font-size:12px;color:var(--muted);text-align:right;white-space:nowrap}.pd-filterbar{display:grid;grid-template-columns:1.4fr repeat(3,1fr) auto;gap:10px;padding:18px 0}.pd-field label{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin:0 0 6px 3px}.pd-field select{width:100%;height:42px;border:1px solid #c9c6c1;border-radius:5px;background:#fff;padding:0 34px 0 12px;color:var(--ink);font-size:13px}.pd-reset{align-self:end;height:42px;border:0;border-radius:5px;background:var(--dark);color:#fff;padding:0 18px;font-weight:700;cursor:pointer}.pd-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px}.pd-card{background:#fff;border:1px solid #e0dedb;border-radius:8px;padding:18px;box-shadow:0 4px 18px rgba(15,15,18,.04)}.pd-kpi{min-height:132px;display:flex;flex-direction:column;justify-content:space-between}.pd-label{font-size:11px;text-transform:uppercase;letter-spacing:.11em;color:var(--muted)}.pd-value{font-size:clamp(25px,3vw,42px);letter-spacing:-.05em;font-weight:600;line-height:1}.pd-note{font-size:12px;color:var(--muted)}.pd-trend{margin-bottom:12px}.pd-trend .pd-canvas-wrap{height:285px}.pd-trend-detail{margin-top:8px;color:var(--muted);font-size:12px}.pd-main{display:grid;grid-template-columns:1.25fr .75fr;gap:12px}.pd-left{display:grid;gap:12px}.pd-chart-card{min-height:330px}.pd-title-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:20px}.pd-title{font-size:17px;margin:0;font-weight:700;letter-spacing:-.02em}.pd-sub{font-size:12px;color:var(--muted);margin-top:4px}.pd-pill{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--red);border:1px solid #efbdc4;border-radius:999px;padding:5px 8px;white-space:nowrap}.pd-canvas-wrap{position:relative;height:250px}.pd-canvas-wrap canvas{display:block;width:100%;height:100%}.pd-bars{display:grid;gap:11px}.pd-bar-row{display:grid;grid-template-columns:minmax(120px,1.35fr) 3fr 52px;gap:12px;align-items:center;font-size:12px}.pd-bar-track{height:9px;background:#eceae7;border-radius:99px;overflow:hidden}.pd-bar{height:100%;background:var(--dark);border-radius:99px;transition:width .35s ease}.pd-rank{font-variant-numeric:tabular-nums;text-align:right}.pd-years{display:flex;align-items:flex-end;gap:10px;height:210px;padding-top:12px;border-bottom:1px solid var(--line)}.pd-year{flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:7px;min-width:0}.pd-ybar{width:min(36px,70%);background:var(--red);border-radius:4px 4px 0 0;min-height:2px;transition:height .35s ease}.pd-yval{font-size:11px;font-weight:700}.pd-ylabel{font-size:11px;color:var(--muted);padding-bottom:9px}.pd-insight{background:var(--dark);color:white;min-height:100%;position:relative;overflow:hidden}.pd-insight:after{content:"";position:absolute;width:260px;height:260px;border:55px solid rgba(213,0,28,.18);border-radius:50%;right:-125px;bottom:-125px}.pd-insight h2{font-size:clamp(25px,3.2vw,43px);letter-spacing:-.045em;line-height:1.03;margin:22px 0 20px;max-width:460px;position:relative;z-index:1}.pd-insight p{color:#c9c7c5;line-height:1.55;font-size:14px;max-width:470px;position:relative;z-index:1}.pd-city-list{margin-top:28px;display:grid;gap:10px;position:relative;z-index:1}.pd-city{display:flex;justify-content:space-between;padding-top:10px;border-top:1px solid #3a393d;font-size:12px}.pd-city b{color:#fff}.pd-city span{color:#aaa7a5}.pd-empty{padding:50px;text-align:center;color:var(--muted)}@media(max-width:900px){.pd-filterbar{grid-template-columns:1fr 1fr}.pd-reset{width:100%}.pd-kpis{grid-template-columns:1fr 1fr}.pd-main{grid-template-columns:1fr}.pd-insight{min-height:430px}}@media(max-width:560px){#porsche-sales-evolution{padding:14px}.pd-top{align-items:flex-start;flex-direction:column}.pd-period{text-align:left}.pd-filterbar,.pd-kpis{grid-template-columns:1fr}.pd-bar-row{grid-template-columns:110px 1fr 38px}.pd-card{padding:15px}}
+</style>
+<div class="pd-shell">
+<header class="pd-top"><div><div class="pd-eyebrow">Sales Intelligence · United States</div><h1>Performance,<br>by design.</h1></div><div class="pd-period" id="pd-period">Base completa · 2024–2027</div></header>
+<section class="pd-filterbar" aria-label="Filtros do dashboard">
+<div class="pd-field"><label for="pd-model">Modelo Porsche</label><select id="pd-model"></select></div>
+<div class="pd-field"><label for="pd-year">Model Year</label><select id="pd-year"></select></div>
+<div class="pd-field"><label for="pd-city">City</label><select id="pd-city"></select></div>
+<div class="pd-field"><label for="pd-pay">Pay Method</label><select id="pd-pay"></select></div>
+<button class="pd-reset" id="pd-reset" type="button">Limpar filtros</button>
+</section>
+<section class="pd-kpis">
+<div class="pd-card pd-kpi"><span class="pd-label">Volume vendido</span><strong class="pd-value" id="k-units">—</strong><span class="pd-note" id="n-units">veículos selecionados</span></div>
+<div class="pd-card pd-kpi"><span class="pd-label">Receita de vendas</span><strong class="pd-value" id="k-revenue">—</strong><span class="pd-note">valor total negociado</span></div>
+<div class="pd-card pd-kpi"><span class="pd-label">Ticket médio</span><strong class="pd-value" id="k-ticket">—</strong><span class="pd-note">preço médio por veículo</span></div>
+<div class="pd-card pd-kpi"><span class="pd-label">Ano-modelo líder</span><strong class="pd-value" id="k-year">—</strong><span class="pd-note" id="n-year">maior participação</span></div>
+</section>
+<section class="pd-card pd-trend">
+<div class="pd-title-row"><div><h2 class="pd-title">Evolução das vendas</h2><div class="pd-sub">Receita mensal ao longo do período selecionado</div></div><span class="pd-pill" id="trend-total">Receita</span></div>
+<div class="pd-canvas-wrap"><canvas id="sales-trend-canvas" role="img" aria-label="Evolução mensal da receita de vendas"></canvas></div>
+<div class="pd-trend-detail" id="trend-detail">Passe o cursor sobre a linha para explorar cada mês.</div>
+</section>
+<section class="pd-main"><div class="pd-left">
+<div class="pd-card pd-chart-card"><div class="pd-title-row"><div><h2 class="pd-title">Modelos mais vendidos</h2><div class="pd-sub">Ranking por quantidade no recorte atual</div></div><span class="pd-pill" id="model-context">Todas as cidades</span></div><div class="pd-canvas-wrap"><canvas id="model-canvas" role="img" aria-label="Ranking dos modelos mais vendidos no recorte selecionado"></canvas></div></div>
+<div class="pd-card pd-chart-card"><div class="pd-title-row"><div><h2 class="pd-title">Distribuição por ano-modelo</h2><div class="pd-sub">Volume vendido por ano de fabricação</div></div><span class="pd-pill">Unidades</span></div><div class="pd-canvas-wrap"><canvas id="year-canvas" role="img" aria-label="Distribuição de vendas por ano-modelo"></canvas></div></div>
+</div>
+<aside class="pd-card pd-insight"><span class="pd-label" style="color:#aaa7a5">Insight executivo</span><h2 id="insight-title">—</h2><p id="insight-copy">—</p><div class="pd-city-list" id="city-list"></div></aside>
+</section></div>
+<script>
+(()=>{const root=document.getElementById("porsche-sales-evolution");const raw=[["INVALID","718 Cayman",2022,79500,"Credit Card","Boston","MA"],["2024-03-14","911 Turbo S",2024,235000,"Wire Transfer","Seattle","WA"],["2024-04-18","Cayenne Coupe",2023,112750,"Financing","Austin","TX"],["INVALID","Macan S",2021,68900,"Cash","Denver","CO"],["2024-05-22","Taycan 4S",2024,121000,"Bank Transfer","Los Angeles","CA"],["2024-08-06","Panamera 4",2023,104500,"Credit Card","Miami","FL"],["2024-07-11","911 Carrera S",2020,96300,"Lease","New York","NY"],["INVALID","Cayenne E-Hybrid",2022,89750,"Wire Transfer","San Diego","CA"],["2024-08-19","718 Boxster",2021,73500,"Debit Card","Chicago","IL"],["2024-09-02","Macan GTS",2024,95000,"Financing","Phoenix","AZ"],["2024-09-17","Taycan Turbo",2023,153200.5,"ACH Payment","Dallas","TX"],["INVALID","911 GT3",2024,241000,"Wire Transfer","Las Vegas","NV"],["2024-05-11","Panamera Turbo S",2022,132000,"Cash","San Jose","CA"],["2024-12-12","Cayenne Turbo GT",2024,188000,"Crypto Payment","Houston","TX"],["2024-12-25","911 Carrera Cabriolet",2023,127800,"Credit Card","Atlanta","GA"],["2025-01-06","Macan",2021,58900,"Bank Transfer","Orlando","FL"],["INVALID","718 Spyder RS",2024,164000,"Financing","Portland","OR"],["2025-02-14","Taycan Cross Turismo",2023,118500,"Wire Transfer","Charlotte","NC"],["INVALID","Cayenne S",2022,91300,"Credit Card","Nashville","TN"],["2025-03-21","911 Targa 4S",2024,158750,"Lease","Minneapolis","MN"],["2025-03-28","Panamera",2020,72000,"Bank Transfer","Philadelphia","PA"],["2025-04-09","Macan Electric",2025,86500,"Wire Transfer","San Antonio","TX"],["INVALID","911 Dakar",2024,270000,"Cash","Salt Lake City","UT"],["2025-05-12","Taycan GTS",2023,139000,"Financing","Raleigh","NC"],["2025-06-18","Cayenne",2021,76800,"Credit Card","Detroit","MI"],["INVALID","718 Cayman GT4 RS",2024,173600,"Wire Transfer","Columbus","OH"],["2025-07-07","911 Carrera GTS",2022,119900,"Cash","Indianapolis","IN"],["2025-07-22","Panamera 4 E-Hybrid",2023,109250,"Lease","Fort Worth","TX"],["2025-08-14","Macan T",2022,82000,"Wire Transfer","Jacksonville","FL"],["2025-09-01","Taycan Turbo S",2025,214000,"Crypto Payment","San Diego","CA"],["INVALID","911 Carrera",2024,124500,"Credit Card","Tampa","FL"],["2025-09-18","Cayenne S",2023,98200,"Bank Transfer","Sacramento","CA"],["2025-10-04","Macan",2022,67500,"Financing","Cleveland","OH"],["2025-10-12","Taycan",2025,116900,"Wire Transfer","Milwaukee","WI"],["2025-10-29","Panamera 4S",2024,112000,"Cash","Kansas City","MO"],["2025-02-11","718 Boxster",2021,74000,"Debit Card","Omaha","NE"],["2025-11-16","911 Turbo",2024,198300,"Wire Transfer","Albuquerque","NM"],["INVALID","Cayenne Coupe",2023,103750,"Wire Transfer","Tucson","AZ"],["INVALID","Macan GTS",2024,93600,"Financing","Fresno","CA"],["2025-12-07","Taycan 4S",2025,129000,"ACH Payment","Virginia Beach","VA"],["2025-12-22","Panamera Turbo",2022,136000,"Credit Card","Colorado Springs","CO"],["INVALID","911 GT3 RS",2024,286500,"Wire Transfer","Arlington","TX"],["2026-01-08","Cayenne E-Hybrid",2023,92800,"Lease","Bakersfield","CA"],["2026-01-15","Macan T",2022,72400,"Cash","Mesa","AZ"],["2026-01-28","Taycan Turbo",2025,158500,"Crypto Payment","Atlanta","GA"],["2026-02-03","718 Cayman",2021,69900,"Bank Transfer","Long Beach","CA"],["INVALID","911 Targa 4",2024,141250,"Financing","Oakland","CA"],["2026-02-19","Panamera",2020,71500,"Wire Transfer","Tulsa","OK"],["2026-02-25","Cayenne Turbo",2023,146800,"Credit Card","Wichita","KS"],["2026-03-01","Macan Electric",2025,89700,"Lease","New Orleans","LA"],["2026-03-14","911 Carrera S",2022,104600,"Bank Transfer","Honolulu","HI"],["INVALID","Taycan GTS",2024,142000,"Wire Transfer","Anaheim","CA"],["2026-04-08","Cayenne",2021,78400,"Cash","Henderson","NV"],["INVALID","718 Spyder RS",2025,169000,"Financing","Lexington","KY"],["2026-04-21","911 Dakar",2024,268900,"Credit Card","Riverside","CA"],["2026-04-29","Panamera 4",2023,101300,"Wire Transfer","Corpus Christi","TX"],["2026-05-05","Macan S",2021,66750,"Cash","St. Louis","MO"],["2026-05-14","Taycan Cross Turismo",2024,127900,"Lease","Pittsburgh","PA"],["2026-05-23","Cayenne Turbo GT",2025,200000,"Wire Transfer","Cincinnati","OH"],["2026-06-02","911 Carrera Cabriolet",2023,132000,"Crypto Payment","Anchorage","AK"],["2026-06-15","718 Cayman GT4 RS",2024,176400,"Credit Card","Plano","TX"],["INVALID","Panamera 4 E-Hybrid",2022,108500,"Bank Transfer","Newark","NJ"],["2026-07-07","Macan",2021,59000,"Financing","Greensboro","NC"],["2026-07-20","Taycan Turbo S",2025,218000,"Wire Transfer","Lincoln","NE"],["INVALID","Cayenne S",2024,99950,"Debit Card","Jersey City","NJ"],["2026-04-08","911 Carrera GTS",2024,121750,"Credit Card","Chandler","AZ"],["2026-08-18","718 Boxster GTS",2023,91500,"Lease","Reno","NV"],["2026-08-31","Panamera Turbo S",2022,134000,"Wire Transfer","Buffalo","NY"],["2026-09-09","Macan GTS",2024,96800,"ACH Payment","Durham","NC"],["2026-09-17","Taycan 4S",2025,131600,"Wire Transfer","Laredo","TX"],["2026-09-28","Cayenne E-Hybrid",2023,94300,"Cash","Madison","WI"],["2026-10-06","911 Turbo S",2025,242000,"Crypto Payment","Lubbock","TX"],["2026-10-16","718 Cayman S",2022,82750,"Credit Card","Toledo","OH"],["2026-10-29","Macan Electric",2026,91300,"Wire Transfer","Irvine","CA"],["2026-11-03","Panamera",2021,79900,"Financing","Garland","TX"],["INVALID","Cayenne Coupe",2024,111000,"Bank Transfer","Irving","TX"],["2026-12-11","911 Targa 4S",2023,156500,"Cash","Chesapeake","VA"],["2026-12-24","Taycan",2025,119900,"Lease","Scottsdale","AZ"],["INVALID","Macan T",2022,73200,"Wire Transfer","Norfolk","VA"],["2026-12-28","911 GT3",2024,224000,"Wire Transfer","Boise","ID"],["2027-01-15","911 Carrera",2024,126900,"Credit Card","Orlando","FL"],["2027-01-29","Cayenne",2023,84500,"Bank Transfer","San Jose","CA"],["2027-02-11","Macan S",2022,69800,"Financing","Tampa","FL"],["INVALID","Taycan 4S",2025,132700,"Wire Transfer","Denver","CO"],["2027-03-05","Panamera",2021,81000,"Cash","Austin","TX"],["2027-03-18","718 Cayman",2023,78900,"Debit Card","Seattle","WA"],["2027-04-02","911 Turbo S",2026,249300,"Wire Transfer","Boston","MA"],["INVALID","Cayenne Coupe",2024,108750,"Wire Transfer","Phoenix","AZ"],["INVALID","Macan Electric",2026,92600,"Financing","Chicago","IL"],["2027-05-12","Taycan Turbo",2025,164000,"ACH Payment","Dallas","TX"],["2027-05-27","Panamera 4S",2024,119000,"Credit Card","San Francisco","CA"],["INVALID","911 GT3",2026,232500,"Wire Transfer","Las Vegas","NV"],["2027-06-18","Cayenne E-Hybrid",2023,96800,"Lease","Charlotte","NC"],["2027-07-03","Macan T",2022,74400,"Cash","Mesa","AZ"],["2027-07-22","Taycan GTS",2025,148500,"Crypto Payment","Atlanta","GA"],["2027-08-08","718 Boxster",2021,71900,"Bank Transfer","Long Beach","CA"],["INVALID","911 Targa 4",2024,143250,"Financing","Oakland","CA"],["2027-09-19","Panamera Turbo",2020,137500,"Wire Transfer","Tulsa","OK"],["2027-09-25","Cayenne Turbo GT",2025,204800,"Credit Card","Wichita","KS"],["2027-10-01","911 Dakar",2024,271700,"Lease","New Orleans","LA"]];const data=raw.map(r=>({date:r[0],model:r[1],year:r[2],price:r[3],pay:r[4],city:r[5],state:r[6]}));const $=s=>root.querySelector(s);const ids={model:$("#pd-model"),year:$("#pd-year"),city:$("#pd-city"),pay:$("#pd-pay")};const money=n=>new Intl.NumberFormat("en-US",{style:"currency",currency:"USD",notation:"compact",maximumFractionDigits:1}).format(n);const num=n=>new Intl.NumberFormat("pt-BR").format(n);const unique=k=>[...new Set(data.map(d=>d[k]))].sort((a,b)=>String(a).localeCompare(String(b)));const fill=(el,label,arr)=>{el.innerHTML='<option value="">'+label+'</option>'+arr.map(v=>'<option>'+v+'</option>').join("")};fill(ids.model,"Todos os modelos",unique("model"));fill(ids.year,"Todos os anos",unique("year"));fill(ids.city,"Todas as cidades",unique("city"));fill(ids.pay,"Todos os métodos",unique("pay"));const count=(rows,k)=>Object.entries(rows.reduce((a,d)=>(a[d[k]]=(a[d[k]]||0)+1,a),{})).sort((a,b)=>b[1]-a[1]||String(a[0]).localeCompare(String(b[0])));
+function setupCanvas(canvas){const dpr=Math.min(devicePixelRatio||1,2),r=canvas.getBoundingClientRect();canvas.width=Math.max(1,Math.round(r.width*dpr));canvas.height=Math.max(1,Math.round(r.height*dpr));const ctx=canvas.getContext("2d");ctx.setTransform(dpr,0,0,dpr,0,0);return {ctx,w:r.width,h:r.height}}
+function palette(){const cs=getComputedStyle(root);return {ink:cs.getPropertyValue("--ink").trim()||"#18181c",muted:cs.getPropertyValue("--muted").trim()||"#6b6a70",line:cs.getPropertyValue("--line").trim()||"#d8d6d2",red:cs.getPropertyValue("--red").trim()||"#d5001c"}}
+function roundRect(ctx,x,y,w,h,r){r=Math.min(r,w/2,h/2);ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
+let trendPoints=[],trendSeries=[];
+function monthLabel(key){const parts=key.split("-");return new Intl.DateTimeFormat("pt-BR",{month:"short",year:"2-digit",timeZone:"UTC"}).format(new Date(Date.UTC(Number(parts[0]),Number(parts[1])-1,1))).replace(".","")}
+function drawTrend(rows){const canvas=$("#sales-trend-canvas"),o=setupCanvas(canvas),ctx=o.ctx,col=palette(),valid=rows.filter(d=>d.date!=="INVALID"),agg={};valid.forEach(d=>{const m=d.date.slice(0,7);if(!agg[m])agg[m]={revenue:0,units:0};agg[m].revenue+=d.price;agg[m].units++});const keys=Object.keys(agg).sort();ctx.clearRect(0,0,o.w,o.h);if(!keys.length){ctx.fillStyle=col.muted;ctx.font="12px Arial";ctx.fillText("Sem datas válidas neste recorte.",16,o.h/2);trendPoints=[];trendSeries=[];$("#trend-total").textContent="Sem período";$("#trend-detail").textContent="Ajuste os filtros para visualizar a evolução.";return}const start=new Date(keys[0]+"-01T00:00:00Z"),end=new Date(keys[keys.length-1]+"-01T00:00:00Z"),series=[];for(let d=new Date(start);d<=end;d.setUTCMonth(d.getUTCMonth()+1)){const key=d.toISOString().slice(0,7);series.push({key,revenue:agg[key]?.revenue||0,units:agg[key]?.units||0})}const max=Math.max(1,...series.map(d=>d.revenue)),pad={l:o.w<520?48:64,r:18,t:18,b:38},pw=o.w-pad.l-pad.r,ph=o.h-pad.t-pad.b;ctx.font="11px Arial";ctx.textAlign="right";ctx.textBaseline="middle";for(let i=0;i<=4;i++){const v=max*(1-i/4),y=pad.t+ph*i/4;ctx.strokeStyle=col.line;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(o.w-pad.r,y);ctx.stroke();ctx.fillStyle=col.muted;ctx.fillText(money(v),pad.l-8,y)}const x=i=>series.length===1?pad.l+pw/2:pad.l+pw*i/(series.length-1),y=v=>pad.t+ph-(v/max)*ph;const step=Math.max(1,Math.ceil(series.length/(o.w<520?4:7)));ctx.textAlign="center";ctx.textBaseline="top";series.forEach((d,i)=>{if(i%step===0||i===series.length-1){ctx.fillStyle=col.muted;ctx.fillText(monthLabel(d.key),x(i),o.h-pad.b+12)}});const grad=ctx.createLinearGradient(0,pad.t,0,pad.t+ph);grad.addColorStop(0,"rgba(213,0,28,.24)");grad.addColorStop(1,"rgba(213,0,28,0)");ctx.beginPath();series.forEach((d,i)=>i?ctx.lineTo(x(i),y(d.revenue)):ctx.moveTo(x(i),y(d.revenue)));ctx.lineTo(x(series.length-1),pad.t+ph);ctx.lineTo(x(0),pad.t+ph);ctx.closePath();ctx.fillStyle=grad;ctx.fill();ctx.beginPath();series.forEach((d,i)=>i?ctx.lineTo(x(i),y(d.revenue)):ctx.moveTo(x(i),y(d.revenue)));ctx.strokeStyle=col.red;ctx.lineWidth=2.5;ctx.lineJoin="round";ctx.lineCap="round";ctx.stroke();trendPoints=series.map((d,i)=>({x:x(i),y:y(d.revenue)}));trendSeries=series;const nonzero=series.filter(d=>d.revenue>0),peak=nonzero.reduce((a,b)=>a.revenue>b.revenue?a:b);$("#trend-total").textContent=money(nonzero.reduce((a,d)=>a+d.revenue,0));$("#trend-detail").textContent="Pico em "+monthLabel(peak.key)+": "+money(peak.revenue)+" · "+peak.units+" venda"+(peak.units===1?"":"s")}
+function drawModels(items){const canvas=$("#model-canvas"),o=setupCanvas(canvas),ctx=o.ctx,col=palette();ctx.clearRect(0,0,o.w,o.h);ctx.font="12px Arial";ctx.textBaseline="middle";if(!items.length){ctx.fillStyle=col.muted;ctx.fillText("Nenhuma venda neste recorte.",16,o.h/2);return}const rows=items.slice(0,7),max=rows[0][1],label=Math.min(155,o.w*.36),right=34,top=8,rowH=(o.h-16)/rows.length;rows.forEach(([name,val],i)=>{const y=top+i*rowH+rowH/2,barX=label,barW=Math.max(10,o.w-label-right),valueW=barW*val/max;ctx.fillStyle=col.muted;ctx.textAlign="left";ctx.fillText(name.length>20?name.slice(0,19)+"…":name,0,y);ctx.fillStyle=col.line;roundRect(ctx,barX,y-5,barW,10,5);ctx.fill();ctx.fillStyle=col.ink;roundRect(ctx,barX,y-5,valueW,10,5);ctx.fill();ctx.font="500 12px Arial";ctx.textAlign="right";ctx.fillText(String(val),o.w,y);ctx.font="12px Arial"})}
+function drawYears(entries){const canvas=$("#year-canvas"),o=setupCanvas(canvas),ctx=o.ctx,col=palette(),map=Object.fromEntries(entries),years=[2020,2021,2022,2023,2024,2025,2026],max=Math.max(1,...years.map(y=>map[y]||0)),pad={l:28,r:8,t:20,b:32},pw=o.w-pad.l-pad.r,ph=o.h-pad.t-pad.b;ctx.clearRect(0,0,o.w,o.h);ctx.strokeStyle=col.line;ctx.beginPath();ctx.moveTo(pad.l,pad.t+ph);ctx.lineTo(o.w-pad.r,pad.t+ph);ctx.stroke();years.forEach((y,i)=>{const cell=pw/years.length,v=map[y]||0,bh=ph*v/max,x=pad.l+i*cell+cell*.22,bw=cell*.56,by=pad.t+ph-bh;ctx.fillStyle=col.red;roundRect(ctx,x,by,bw,bh,4);ctx.fill();ctx.fillStyle=col.ink;ctx.textAlign="center";ctx.font="500 11px Arial";ctx.fillText(String(v),x+bw/2,Math.max(10,by-8));ctx.fillStyle=col.muted;ctx.font="11px Arial";ctx.fillText(String(y),x+bw/2,o.h-10)})}function update(){const f=data.filter(d=>(!ids.model.value||d.model===ids.model.value)&&(!ids.year.value||String(d.year)===ids.year.value)&&(!ids.city.value||d.city===ids.city.value)&&(!ids.pay.value||d.pay===ids.pay.value));const total=f.reduce((s,d)=>s+d.price,0),years=count(f,"year"),models=count(f,"model"),cities=count(f,"city");$("#k-units").textContent=num(f.length);$("#k-revenue").textContent=money(total);$("#k-ticket").textContent=f.length?money(total/f.length):"—";$("#k-year").textContent=years[0]?.[0]||"—";$("#n-year").textContent=years[0]?Math.round(years[0][1]/f.length*100)+"% do volume filtrado":"sem registros";$("#model-context").textContent=ids.city.value||"Todas as cidades";drawTrend(f);drawModels(models);drawYears(years);const leadM=models[0],leadY=years[0],share=leadM&&f.length?Math.round(leadM[1]/f.length*100):0;$("#insight-title").textContent=leadM?leadM[0]+" lidera o recorte.":"Nenhum dado encontrado.";$("#insight-copy").textContent=leadM?"Com "+leadM[1]+" venda"+(leadM[1]>1?"s":"")+" e "+share+"% do volume, o modelo se destaca. O ano-modelo "+leadY[0]+" concentra a maior procura; o ticket médio é "+money(total/f.length)+".":"Ajuste ou limpe os filtros para visualizar os indicadores.";$("#city-list").innerHTML=cities.slice(0,6).map(([city,v],i)=>{const subset=f.filter(d=>d.city===city),top=count(subset,"model")[0];return '<div class="pd-city"><span>0'+(i+1)+' · '+city+'</span><b>'+top[0]+' · '+v+'</b></div>'}).join("");const valid=f.filter(d=>d.date!=="INVALID").map(d=>d.date).sort();$("#pd-period").textContent=valid.length?"Período · "+valid[0].slice(0,7)+" a "+valid.at(-1).slice(0,7):"Datas indisponíveis"}const trendCanvas=$("#sales-trend-canvas");trendCanvas.addEventListener("mousemove",e=>{if(!trendPoints.length)return;const r=trendCanvas.getBoundingClientRect(),mx=e.clientX-r.left;let best=0;for(let i=1;i<trendPoints.length;i++)if(Math.abs(trendPoints[i].x-mx)<Math.abs(trendPoints[best].x-mx))best=i;const d=trendSeries[best];$("#trend-detail").textContent=monthLabel(d.key)+": "+money(d.revenue)+" · "+d.units+" venda"+(d.units===1?"":"s")});trendCanvas.addEventListener("mouseleave",()=>{const active=data.filter(d=>(!ids.model.value||d.model===ids.model.value)&&(!ids.year.value||String(d.year)===ids.year.value)&&(!ids.city.value||d.city===ids.city.value)&&(!ids.pay.value||d.pay===ids.pay.value));const valid=active.filter(d=>d.date!=="INVALID"),agg={};valid.forEach(d=>{const m=d.date.slice(0,7);if(!agg[m])agg[m]={revenue:0,units:0};agg[m].revenue+=d.price;agg[m].units++});const vals=Object.entries(agg);if(vals.length){const peak=vals.reduce((a,b)=>a[1].revenue>b[1].revenue?a:b);$("#trend-detail").textContent="Pico em "+monthLabel(peak[0])+": "+money(peak[1].revenue)+" · "+peak[1].units+" venda"+(peak[1].units===1?"":"s")}});Object.values(ids).forEach(el=>el.addEventListener("change",update));let resizeTimer;window.addEventListener("resize",()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(update,120)});$("#pd-reset").addEventListener("click",()=>{Object.values(ids).forEach(el=>el.value="");update()});update()})();
+</script></div>
+
+
+
+<script id="codex-visualization-floating-ui-core" src="https://unpkg.com/@floating-ui/core@1.7.3/dist/floating-ui.core.umd.min.js"></script>
+<script id="codex-visualization-floating-ui-dom" src="https://unpkg.com/@floating-ui/dom@1.7.4/dist/floating-ui.dom.umd.min.js"></script>
+<script id="codex-visualization-lucide" async src="https://unpkg.com/lucide@1.17.0/dist/umd/lucide.js"></script>
+<script id="codex-visualization-tooltip">/* oxlint-disable typescript/no-unsafe-argument, typescript/no-unsafe-call, typescript/no-unsafe-return */
+// Runs inside the visualization sandbox, not the host webview.
+(() => {
+  if (window.FloatingUIDOM == null) {
+    return;
+  }
+  const { autoUpdate, computePosition, flip, offset, shift, size } =
+    window.FloatingUIDOM;
+  const tooltipPlacements = new Set(["top", "right", "bottom", "left"]);
+  const tooltipId = `codex-visualization-tooltip-${
+    window.crypto?.randomUUID?.() ?? Date.now().toString(36)
+  }`;
+  const tooltipGap = 5;
+  const hoverDelay = 700;
+  const skipDelay = 300;
+  let activeTrigger = null;
+  let pendingTrigger = null;
+  let tooltip = null;
+  let openTimeout = null;
+  let autoUpdateCleanup = null;
+  let positionRequest = 0;
+  let skipDelayUntil = 0;
+
+  const getTrigger = (target) =>
+    target?.nodeType === Node.ELEMENT_NODE
+      ? target.closest("[data-tooltip]")
+      : null;
+  const containsTarget = (trigger, target) =>
+    target?.nodeType != null && trigger.contains(target);
+  const getContent = (trigger) =>
+    trigger.getAttribute("data-tooltip")?.trim() ?? "";
+  const getPlacement = (trigger) => {
+    const placement = trigger.getAttribute("data-tooltip-placement");
+    return tooltipPlacements.has(placement) ? placement : "top";
+  };
+  const getTooltip = () => {
+    if (tooltip == null) {
+      tooltip = document.createElement("div");
+      tooltip.id = tooltipId;
+      tooltip.className = "tooltip";
+      tooltip.setAttribute("role", "tooltip");
+    }
+    return tooltip;
+  };
+  const setDescribedBy = (trigger, described) => {
+    const ids = new Set(
+      (trigger.getAttribute("aria-describedby") ?? "")
+        .split(/\s+/)
+        .filter(Boolean),
+    );
+    if (described) {
+      ids.add(tooltipId);
+    } else {
+      ids.delete(tooltipId);
+    }
+    if (ids.size === 0) {
+      trigger.removeAttribute("aria-describedby");
+    } else {
+      trigger.setAttribute("aria-describedby", [...ids].join(" "));
+    }
+  };
+  const clearOpenTimeout = () => {
+    if (openTimeout != null) {
+      window.clearTimeout(openTimeout);
+      openTimeout = null;
+    }
+    pendingTrigger = null;
+  };
+  const closeTooltip = (activateSkipDelay = true) => {
+    clearOpenTimeout();
+    positionRequest += 1;
+    autoUpdateCleanup?.();
+    autoUpdateCleanup = null;
+    if (activeTrigger == null) {
+      return;
+    }
+    setDescribedBy(activeTrigger, false);
+    activeTrigger = null;
+    tooltip?.remove();
+    if (activateSkipDelay) {
+      skipDelayUntil = Date.now() + skipDelay;
+    }
+  };
+  const updatePosition = (trigger, floating) => {
+    const request = ++positionRequest;
+    void computePosition(trigger, floating, {
+      middleware: [
+        offset(tooltipGap),
+        flip({ padding: tooltipGap }),
+        shift({ padding: tooltipGap }),
+        size({
+          padding: tooltipGap,
+          apply({ availableHeight, availableWidth, elements }) {
+            elements.floating.style.setProperty(
+              "--tooltip-available-width",
+              `${Math.max(0, availableWidth)}px`,
+            );
+            elements.floating.style.setProperty(
+              "--tooltip-available-height",
+              `${Math.max(0, availableHeight)}px`,
+            );
+          },
+        }),
+      ],
+      placement: getPlacement(trigger),
+      strategy: "fixed",
+    })
+      .then(({ x, y }) => {
+        if (activeTrigger !== trigger || request !== positionRequest) {
+          return;
+        }
+        const scale = window.devicePixelRatio || 1;
+        floating.style.transform = `translate(${Math.round(x * scale) / scale}px, ${Math.round(y * scale) / scale}px)`;
+        floating.style.visibility = "visible";
+      })
+      .catch(() => {
+        if (activeTrigger === trigger && request === positionRequest) {
+          closeTooltip(false);
+        }
+      });
+  };
+  const openTooltip = (trigger) => {
+    const content = getContent(trigger);
+    if (!trigger.isConnected || content.length === 0) {
+      return;
+    }
+    clearOpenTimeout();
+    if (activeTrigger === trigger) {
+      return;
+    }
+    closeTooltip();
+    const floating = getTooltip();
+    floating.textContent = content;
+    floating.style.visibility = "hidden";
+    floating.style.transform = "translate(0, 0)";
+    document.body.appendChild(floating);
+    activeTrigger = trigger;
+    setDescribedBy(trigger, true);
+    autoUpdateCleanup = autoUpdate(trigger, floating, () => {
+      updatePosition(trigger, floating);
+    });
+  };
+  const requestOpen = (trigger, immediate = false) => {
+    if (
+      getContent(trigger).length === 0 ||
+      activeTrigger === trigger ||
+      pendingTrigger === trigger
+    ) {
+      return;
+    }
+    clearOpenTimeout();
+    pendingTrigger = trigger;
+    const delay =
+      immediate || activeTrigger != null || Date.now() < skipDelayUntil
+        ? 0
+        : hoverDelay;
+    if (delay === 0) {
+      openTooltip(trigger);
+      return;
+    }
+    openTimeout = window.setTimeout(() => {
+      openTimeout = null;
+      pendingTrigger = null;
+      openTooltip(trigger);
+    }, delay);
+  };
+  const handlePointerOpen = (event) => {
+    if (event.pointerType === "touch") {
+      return;
+    }
+    const trigger = getTrigger(event.target);
+    if (trigger == null || containsTarget(trigger, event.relatedTarget)) {
+      return;
+    }
+    requestOpen(trigger);
+  };
+  const handleLeave = (event) => {
+    const trigger = getTrigger(event.target);
+    if (trigger == null || containsTarget(trigger, event.relatedTarget)) {
+      return;
+    }
+    if (activeTrigger === trigger || pendingTrigger === trigger) {
+      closeTooltip();
+    }
+  };
+  const handleFocusIn = (event) => {
+    const trigger = getTrigger(event.target);
+    if (trigger?.matches(":focus-visible")) {
+      requestOpen(trigger, true);
+    }
+  };
+  const handleKeyDown = (event) => {
+    if (event.key === "Escape") {
+      closeTooltip();
+    }
+  };
+  const handleContextMenu = (event) => {
+    const trigger = getTrigger(event.target);
+    if (activeTrigger === trigger || pendingTrigger === trigger) {
+      closeTooltip();
+    }
+  };
+  const destroy = () => {
+    closeTooltip(false);
+    document.removeEventListener("pointerover", handlePointerOpen);
+    document.removeEventListener("pointerout", handleLeave);
+    document.removeEventListener("focusin", handleFocusIn);
+    document.removeEventListener("focusout", handleLeave);
+    document.removeEventListener("keydown", handleKeyDown);
+    document.removeEventListener("contextmenu", handleContextMenu);
+    tooltip = null;
+  };
+
+  document.addEventListener("pointerover", handlePointerOpen);
+  document.addEventListener("pointerout", handleLeave);
+  document.addEventListener("focusin", handleFocusIn);
+  document.addEventListener("focusout", handleLeave);
+  document.addEventListener("keydown", handleKeyDown);
+  document.addEventListener("contextmenu", handleContextMenu);
+  window.addEventListener("pagehide", destroy, { once: true });
+})();
+</script>
+<script id="codex-visualization-lucide-initialization">(() => {
+  const initialize = () => {
+    globalThis.lucide?.createIcons({ attrs: { width: 16, height: 16 } });
+  };
+  if (globalThis.lucide != null) {
+    initialize();
+    return;
+  }
+  document
+    .getElementById("codex-visualization-lucide")
+    ?.addEventListener("load", initialize, { once: true });
+})();
+</script>
+</body>
+</html>
